@@ -8,8 +8,8 @@ https://bbs.archlinux.org/viewtopic.php?id=37381
 It also uses some code from the Python Cookbook
 '''
 
-#http://api.openweathermap.org/data/2.5/weather?q=boston,us
-import sys,re,json
+
+import sys,json
 from urllib import urlopen
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -69,12 +69,10 @@ def getInfo(city,country,i=4):
         printInfo(city0,country0,description,str(int(convertK2C2F(temp))),str(int(convertK2C2F(max_temp))),str(int(convertK2C2F(min_temp))),i,myArr)
     except (ValueError, KeyError):
         print 'If you are seeing this something went wrong, check your spelling!'
-    
 
 try:
-    if sys.argv[1] != 'all':
-        city = sys.argv[1]
-        country = sys.argv[2]
+    city = sys.argv[1]
+    country = sys.argv[2]
 except IndexError:
     print 'usage: python ' + sys.argv[0] + ' <city> <country> '
     sys.exit(0)
