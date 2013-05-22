@@ -6,8 +6,6 @@ This project was ported from a shell scipt forum post found here:
 https://bbs.archlinux.org/viewtopic.php?id=37381
 
 It also uses some code from the Python Cookbook
-
-By FireElementalNE
 '''
 
 import sys,json
@@ -59,15 +57,18 @@ def printInfo(city,country,cond,temp,tmax,tmin,arrnum,arr):
     sys.stdout.write(tmin + 'F\n')
 
 def getInfo(city,country,i=4):
-    url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
-    content = json.loads(urlopen(url).read())
-    description = content['weather'][0]['description']
-    max_temp = content['main']['temp_max']
-    min_temp = content['main']['temp_min']
-    temp = content['main']['temp']
-    city0 = content['name']
-    country0 = content['sys']['country']
-    printInfo(city0,country0,description,str(int(convertK2C2F(temp))),str(int(convertK2C2F(max_temp))),str(int(convertK2C2F(min_temp))),i,myArr)
+    try:
+        url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
+        content = json.loads(urlopen(url).read())
+        description = content['weather'][0]['description']
+        max_temp = content['main']['temp_max']
+        min_temp = content['main']['temp_min']
+        temp = content['main']['temp']
+        city0 = content['name']
+        country0 = content['sys']['country']
+        printInfo(city0,country0,description,str(int(convertK2C2F(temp))),str(int(convertK2C2F(max_temp))),str(int(convertK2C2F(min_temp))),i,myArr)
+    except (ValueError, KeyError):
+        print 'If you are seeing this then something went wrong, check your spelling'
 
 if __name__ == "__main__":
 
