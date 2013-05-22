@@ -8,7 +8,7 @@ https://bbs.archlinux.org/viewtopic.php?id=37381
 It also uses some code from the Python Cookbook
 '''
 
-import sys,re,json
+import sys,json
 from urllib import urlopen
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -40,6 +40,7 @@ def printout(text, colour=WHITE):
         sys.stdout.write(text)
 
 #END python cookbook
+
 def convertK2C2F(temp):
     return (((temp-273.15)*9)/5)+32
 
@@ -66,11 +67,13 @@ def getInfo(city,country,i=4):
     country0 = content['sys']['country']
     printInfo(city0,country0,description,str(int(convertK2C2F(temp))),str(int(convertK2C2F(max_temp))),str(int(convertK2C2F(min_temp))),i,myArr)
 
-try:
-    if sys.argv[1] != 'all':
-        city = sys.argv[1]
-        country = sys.argv[2]
-except IndexError:
-    print 'usage: python ' + sys.argv[0] + ' <city> <country> '
-    sys.exit(0)
-getInfo(city,country)
+if __name__ == "__main__":
+
+    try:
+        if sys.argv[1] != 'all':
+            city = sys.argv[1]
+            country = sys.argv[2]
+    except IndexError:
+        print 'usage: python ' + sys.argv[0] + ' <city> <country> '
+        sys.exit(0)
+    getInfo(city,country)
