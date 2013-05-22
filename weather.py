@@ -6,6 +6,8 @@ This project was ported from a shell scipt forum post found here:
 https://bbs.archlinux.org/viewtopic.php?id=37381
 
 It also uses some code from the Python Cookbook
+
+By FireElementalNE
 '''
 
 import sys,json
