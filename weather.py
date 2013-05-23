@@ -81,24 +81,30 @@ def getDirection(wd): #convert from deg to compass direction used javascript @ h
 def convertK2C2FToString(temp):
     return str(int((((temp-273.15)*9)/5)+32))
 
-def float2int2string(arg):
+def convertK2CToString(temp):
+    return str(int(((temp-273.15))))
+
+def float2Int2String(arg):
     return str(int(arg))
 
-def printInfo(city,country,cond,temp,tmax,tmin,windS,windD,arr):
+def mph2kph(arg):
+    return str(int(1.609344 * arg))
+
+def printInfo(city,country,cond,temp,tmax,tmin,windS,windD,arr,unit1,unit2):
     printout("Location: ",arr[0])
     sys.stdout.write(city + ', ' + country + ' ')
     printout("Condition: ",arr[1])
     sys.stdout.write(cond + ' ')
     printout("Temp: ",arr[2])
-    sys.stdout.write(temp + 'F ')
+    sys.stdout.write(temp + unit1 + ' ')
     printout("Max Temp: ",arr[3])
-    sys.stdout.write(tmax + 'F ')
+    sys.stdout.write(tmax + unit1 + ' ')
     printout("Min Temp: ",arr[4])
-    sys.stdout.write(tmin + 'F ')
+    sys.stdout.write(tmin + unit1 + ' ')
     printout("Wind: ",arr[5])
-    sys.stdout.write(windS + 'mph ' + windD + '\n') 
+    sys.stdout.write(windS + unit2 + ' ' + windD + '\n') 
 
-def getInfo(city,country='#'): #get data
+def getInfo(unit,city,country='#'): #get data
     try:
         if country != '#': #Contruct proper url depending on args
             url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
@@ -113,24 +119,30 @@ def getInfo(city,country='#'): #get data
         country0 = content['sys']['country']
         windSpeed = content['wind']['speed']
         windDeg = content['wind']['deg']
-        printInfo(city0,country0, description, convertK2C2FToString(temp), convertK2C2FToString(max_temp), convertK2C2FToString(min_temp), float2int2string(windSpeed), getDirection(windDeg), myArr)
+        if unit.lower() == 'f' or unit.lower() == 'fahrenheit':
+            printInfo(city0,country0, description, convertK2C2FToString(temp), convertK2C2FToString(max_temp), convertK2C2FToString(min_temp), float2Int2String(windSpeed), getDirection(windDeg), myArr,'F','mph')
+        elif unit.lower() == 'c' or unit.lower() == 'celcius':
+            printInfo(city0,country0, description, convertK2CToString(temp), convertK2CToString(max_temp), convertK2CToString(min_temp), mph2kph(windSpeed), getDirection(windDeg), myArr,'C','kph')
+        elif unit.lower() == 'k' or unit.lower() == 'kelvin':
+            printInfo(city0,country0, description, float2Int2String(temp), float2Int2String(max_temp), float2Int2String(min_temp), mph2kph(windSpeed), getDirection(windDeg), myArr,'K','kph')
     except (ValueError, KeyError):
         print 'If you are seeing this something went wrong, check your spelling!'
 
 try:
     flag = 0
     myRegex = '^(\d\d\d\d+)$' #city ID?
-    city = sys.argv[1]
+    unit = sys.argv[1]
+    city = sys.argv[2]
     m = re.search(myRegex,city)
     country = ''
     if m == None: #if not continue as normal
-        country = sys.argv[2]
+        country = sys.argv[3]
         flag = 1
 except (IndexError, AttributeError):
-    print 'usage: python ' + sys.argv[0] + ' <city> <country> '
-    print 'usage: python ' + sys.argv[0] + ' <city ID> '
+    print 'usage: python ' + sys.argv[0] + ' <unit: K, F, or C> <city> <country> '
+    print 'usage: python ' + sys.argv[0] + ' <unit: K, F, or C> <city ID> '
     sys.exit(0)
 if flag == 1:
-    getInfo(city,country)
+    getInfo(unit,city,country)
 else:
-    getInfo(city)
+    getInfo(unit,city)
