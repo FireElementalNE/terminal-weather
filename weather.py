@@ -8,12 +8,11 @@ https://bbs.archlinux.org/viewtopic.php?id=37381
 It also uses some code from the Python Cookbook
 '''
 
-
-import sys,json
+import sys,json,re
 from urllib import urlopen
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
-#choose color here
+
 myArr = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
 
 #following from Python cookbook, #475186
@@ -41,39 +40,97 @@ def printout(text, colour=WHITE):
         sys.stdout.write(text)
 
 #END python cookbook
-def convertK2C2F(temp):
-    return (((temp-273.15)*9)/5)+32
 
-def printInfo(city,country,cond,temp,tmax,tmin,arrnum,arr):
-    printout("Location: ",arr[arrnum])
+def getDirection(wd): #convert from deg to compass direction used javascript @ http://www.csgnetwork.com/degrees2direct.html as a skeliton
+    if wd >= 0 and wd <= 11.25:
+        return 'N'
+    elif wd > 348.75 and wd <= 360:
+        return 'N'
+    elif wd > 11.25 and wd <= 33.75:
+        return 'NNE'
+    elif wd > 33.75 and wd <= 56.25:
+        return 'NE'
+    elif wd > 56.25 and wd <= 78.75:
+        return 'ENE'
+    elif wd > 78.75 and wd <= 101.25:
+        return  'E'
+    elif wd > 101.25 and wd <= 123.75:
+        return 'ESE'
+    elif wd > 123.75 and wd <= 146.25:
+        return 'SE'
+    elif wd > 146.25 and wd <= 168.75:
+        return 'SSE'
+    elif wd > 168.75 and wd <= 191.25:
+        return 'S'
+    elif wd > 191.25 and wd <= 213.75:
+        return 'SSW'
+    elif wd > 213.75 and wd <= 236.25:
+        return 'SW'
+    elif wd > 236.25 and wd <= 258.75:
+        return 'WSW'
+    elif wd > 258.75 and wd <= 281.25:
+        return 'W'
+    elif wd > 281.25 and wd <= 303.75:
+        return 'WNW'
+    elif wd > 303.75 and wd <= 326.25:
+        return 'NW'
+    elif wd > 326.25 and wd <= 348.75:
+        return 'NNW'
+
+#2 simple conversion functions
+def convertK2C2FToString(temp):
+    return str(int((((temp-273.15)*9)/5)+32))
+
+def float2int2string(arg):
+    return str(int(arg))
+
+def printInfo(city,country,cond,temp,tmax,tmin,windS,windD,arr):
+    printout("Location: ",arr[0])
     sys.stdout.write(city + ', ' + country + ' ')
-    printout("Condition: ",arr[arrnum])
+    printout("Condition: ",arr[1])
     sys.stdout.write(cond + ' ')
-    printout("Temp: ",arr[arrnum])
+    printout("Temp: ",arr[2])
     sys.stdout.write(temp + 'F ')
-    printout("Max Temp: ",arr[arrnum])
+    printout("Max Temp: ",arr[3])
     sys.stdout.write(tmax + 'F ')
-    printout("Min Temp: ",arr[arrnum])
-    sys.stdout.write(tmin + 'F\n')
+    printout("Min Temp: ",arr[4])
+    sys.stdout.write(tmin + 'F ')
+    printout("Wind: ",arr[5])
+    sys.stdout.write(windS + 'mph ' + windD + '\n') 
 
-def getInfo(city,country,i=4):
+def getInfo(city,country='#'): #get data
     try:
-        url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
-        content = json.loads(urlopen(url).read())
-        description = content['weather'][0]['description']
+        if country != '#': #Contruct proper url depending on args
+            url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
+        else:
+            url = 'http://api.openweathermap.org/data/2.5/weather?q=%s' % (city)
+        content = json.loads(urlopen(url).read()) #Fetch and load JSON data
+        description = content['weather'][0]['description'] #get result accorfing to weather API
         max_temp = content['main']['temp_max']
         min_temp = content['main']['temp_min']
         temp = content['main']['temp']
         city0 = content['name']
         country0 = content['sys']['country']
-        printInfo(city0,country0,description,str(int(convertK2C2F(temp))),str(int(convertK2C2F(max_temp))),str(int(convertK2C2F(min_temp))),i,myArr)
+        windSpeed = content['wind']['speed']
+        windDeg = content['wind']['deg']
+        printInfo(city0,country0, description, convertK2C2FToString(temp), convertK2C2FToString(max_temp), convertK2C2FToString(min_temp), float2int2string(windSpeed), getDirection(windDeg), myArr)
     except (ValueError, KeyError):
         print 'If you are seeing this something went wrong, check your spelling!'
 
 try:
+    flag = 0
+    myRegex = '^(\d\d\d\d+)$' #city ID?
     city = sys.argv[1]
-    country = sys.argv[2]
-except IndexError:
+    m = re.search(myRegex,city)
+    country = ''
+    if m == None: #if not continue as normal
+        country = sys.argv[2]
+        flag = 1
+except (IndexError, AttributeError):
     print 'usage: python ' + sys.argv[0] + ' <city> <country> '
+    print 'usage: python ' + sys.argv[0] + ' <city ID> '
     sys.exit(0)
-getInfo(city,country)
+if flag == 1:
+    getInfo(city,country)
+else:
+    getInfo(city)
