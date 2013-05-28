@@ -131,7 +131,6 @@ try:
     flag = 0
     myRegex = '^(\d\d\d\d+)$' #city ID?
     city = sys.argv[1]
-    print city
     m = re.search(myRegex,city)
     country = ''
     if m == None: #if not continue as normal
