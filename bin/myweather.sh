@@ -4,14 +4,14 @@ if [ $# -eq 3 ]; then
     UNIT=$1
     CITY=$2
     COUNTRY=$3
-    python weather.py ${UNIT} ${CITY} ${COUNTRY}
+    python ../weather.py ${UNIT} ${CITY} ${COUNTRY}
 else
     if [ $# -eq 2 ]; then
 	UNIT=$1
 	CITY=$2
-	python weather.py ${UNIT} ${CITY}
+	python ../weather.py ${UNIT} ${CITY}
     else
-	python weather.py
+	python ../weather.py
     fi
 fi
 
