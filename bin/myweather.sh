@@ -14,7 +14,7 @@ else
 	else
 	    CITY=$1
 	    COUNTRY=$2
-	    python ~/weather/weather.py ${CITY} ${UNIT}
+	    python ~/weather/weather.py ${CITY} ${COUNTRY}
 	fi
     else
 	if [ $# -eq 1 ]; then
