@@ -104,7 +104,7 @@ def printInfo(city,country,cond,temp,tmax,tmin,windS,windD,arr,unit1,unit2):
     printout("Wind: ",arr[5])
     sys.stdout.write(windS + unit2 + ' ' + windD + '\n') 
 
-def getInfo(unit,city,country='#'): #get data
+def getInfo(city,country='#',unit='f'): #get data
     try:
         if country != '#': #Contruct proper url depending on args
             url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
@@ -127,22 +127,35 @@ def getInfo(unit,city,country='#'): #get data
             printInfo(city0,country0, description, float2Int2String(temp), float2Int2String(max_temp), float2Int2String(min_temp), mph2kph(windSpeed), getDirection(windDeg), myArr,'K','kph')
     except (ValueError, KeyError):
         print 'If you are seeing this something went wrong, check your spelling!'
-
 try:
     flag = 0
     myRegex = '^(\d\d\d\d+)$' #city ID?
-    unit = sys.argv[1]
-    city = sys.argv[2]
+    city = sys.argv[1]
+    print city
     m = re.search(myRegex,city)
     country = ''
     if m == None: #if not continue as normal
-        country = sys.argv[3]
+        country = sys.argv[2]
         flag = 1
 except (IndexError, AttributeError):
-    print 'usage: python ' + sys.argv[0] + ' <unit: K, F, or C> <city> <country> '
-    print 'usage: python ' + sys.argv[0] + ' <unit: K, F, or C> <city ID> '
+    print 'usage: python ' + sys.argv[0] + ' <city> <country> <OPTIONAL unit: K, F, or C> '
+    print 'usage: python ' + sys.argv[0] + ' <city ID> <OPTIONAL unit: K, F, or C> '
     sys.exit(0)
-if flag == 1:
-    getInfo(unit,city,country)
+try:
+    flag2 = 0
+    if flag == 1:
+        unit = sys.argv[3]
+    else:
+        unit = sys.argv[2]
+except IndexError:
+    flag2 = 1
+if flag2 == 0:
+    if flag == 1:
+        getInfo(city,country,unit)
+    else:
+        getInfo(city,'#',unit) #ugly
 else:
-    getInfo(unit,city)
+    if flag == 1:
+        getInfo(city,country) 
+    else:
+        getInfo(city)
