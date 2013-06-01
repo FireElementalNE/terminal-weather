@@ -1,6 +1,6 @@
 #!/bin/bash
 #be sure to change the directories OR add this dir to your path!
-MYDIR=~/terminal-weather/weather.py
+MYDIR=../weather.py
 if [ $# -eq 3 ]; then
     UNIT=$3
     CITY=$1
