@@ -104,9 +104,9 @@ def printInfo(city,country,cond,temp,tmax,tmin,windS,windD,arr,unit1,unit2):
     printout("Wind: ",arr[5])
     sys.stdout.write(windS + unit2 + ' ' + windD + '\n') 
 
-def getInfo(city,country='#',unit='f'): #get data
+def getInfo(city,country=None,unit=None): #get data
     try:
-        if country != '#': #Contruct proper url depending on args
+        if country != None: #Contruct proper url depending on args
             url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
         else:
             url = 'http://api.openweathermap.org/data/2.5/weather?q=%s' % (city)
@@ -119,6 +119,8 @@ def getInfo(city,country='#',unit='f'): #get data
         country0 = content['sys']['country']
         windSpeed = content['wind']['speed']
         windDeg = content['wind']['deg']
+        if unit == None:
+            unit = 'f'
         if unit.lower() == 'f' or unit.lower() == 'fahrenheit':
             printInfo(city0,country0, description, convertK2C2FToString(temp), convertK2C2FToString(max_temp), convertK2C2FToString(min_temp), float2Int2String(windSpeed), getDirection(windDeg), myArr,'F','mph')
         elif unit.lower() == 'c' or unit.lower() == 'celcius':
@@ -129,7 +131,7 @@ def getInfo(city,country='#',unit='f'): #get data
         print 'If you are seeing this something went wrong, check your spelling!'
 try:
     flag = 0
-    myRegex = '^(\d\d\d\d+)$' #city ID?
+    myRegex = '^(\d\d\d\d+)$' #city ID
     city = sys.argv[1]
     m = re.search(myRegex,city)
     country = ''
@@ -152,9 +154,9 @@ if flag2 == 0:
     if flag == 1:
         getInfo(city,country,unit)
     else:
-        getInfo(city,'#',unit) #ugly
+        getInfo(city,None,unit)
 else:
     if flag == 1:
-        getInfo(city,country) 
+        getInfo(city,country,None) 
     else:
-        getInfo(city)
+        getInfo(city,None,None)
