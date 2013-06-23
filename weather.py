@@ -8,14 +8,13 @@ https://bbs.archlinux.org/viewtopic.php?id=37381
 It also uses some code from the Python Cookbook
 '''
 
-import sys,json,re
+import sys,json,re,os,pprint
 from urllib import urlopen
 
-BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
-myArr = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
 
 #following from Python cookbook, #475186
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
 def has_colours(stream):
     if not hasattr(stream, "isatty"):
@@ -30,8 +29,8 @@ def has_colours(stream):
         # guess false in case of error
         return False
 
-has_colours = has_colours(sys.stdout)
 
+has_colours = has_colours(sys.stdout)
 def printout(text, colour=WHITE):
     if has_colours:
         seq = "\x1b[1;%dm" % (30+colour) + text + "\x1b[0m"
@@ -77,6 +76,10 @@ def getDirection(wd): #convert from deg to compass direction used javascript @ h
     elif wd > 326.25 and wd <= 348.75:
         return 'NNW'
 
+
+def verbose(ver,s,fh):
+    if ver:
+        os.write(fh,s)
 #2 simple conversion functions
 def convertK2C2FToString(temp):
     return str(int((((temp-273.15)*9)/5)+32))
@@ -104,13 +107,17 @@ def printInfo(city,country,cond,temp,tmax,tmin,windS,windD,arr,unit1,unit2):
     printout("Wind: ",arr[5])
     sys.stdout.write(windS + unit2 + ' ' + windD + '\n') 
 
-def getInfo(city,country=None,unit=None): #get data
+def getInfo(VER,FH,city,country=None,unit=None): #get data
     try:
         if country != None: #Contruct proper url depending on args
             url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
         else:
             url = 'http://api.openweathermap.org/data/2.5/weather?q=%s' % (city)
+        verbose(VER,'Sending/Receiving Request...',FH)
         content = json.loads(urlopen(url).read()) #Fetch and load JSON data
+        verbose(VER,'done.\n',FH)
+        verbose(VER,'printing JSON result:\n',FH)
+        pprint.pprint(content)
         description = content['weather'][0]['description'] #get result accorfing to weather API
         max_temp = content['main']['temp_max']
         min_temp = content['main']['temp_min']
@@ -119,6 +126,7 @@ def getInfo(city,country=None,unit=None): #get data
         country0 = content['sys']['country']
         windSpeed = content['wind']['speed']
         windDeg = content['wind']['deg']
+        verbose(VER,'Printing Data:\n',FH)
         if unit == None:
             unit = 'f'
         if unit.lower() == 'f' or unit.lower() == 'fahrenheit':
@@ -129,6 +137,12 @@ def getInfo(city,country=None,unit=None): #get data
             printInfo(city0,country0, description, float2Int2String(temp), float2Int2String(max_temp), float2Int2String(min_temp), mph2kph(windSpeed), getDirection(windDeg), myArr,'K','kph')
     except (ValueError, KeyError):
         print 'If you are seeing this something went wrong, check your spelling!'
+
+VER = True
+FH = 1
+myArr = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
+
+
 try:
     flag = 0
     myRegex = '^(\d\d\d\d+)$' #city ID
@@ -136,8 +150,11 @@ try:
     m = re.search(myRegex,city)
     country = ''
     if m == None: #if not continue as normal
+        verbose(VER,'Not using City Code...\n',FH)
         country = sys.argv[2]
         flag = 1
+    else:
+        verbose(VER,'Using City Code...\n',FH)
 except (IndexError, AttributeError):
     print 'usage: python ' + sys.argv[0] + ' <city> <country> <OPTIONAL unit: K, F, or C> '
     print 'usage: python ' + sys.argv[0] + ' <city ID> <OPTIONAL unit: K, F, or C> '
@@ -152,11 +169,15 @@ except IndexError:
     flag2 = 1
 if flag2 == 0:
     if flag == 1:
-        getInfo(city,country,unit)
+        verbose(VER,'Detected unit change...\n',FH)
+        getInfo(VER,FH,city,country,unit)
     else:
-        getInfo(city,None,unit)
+        verbose(VER,'Detected unit change...\n',FH)
+        getInfo(VER,FH,city,None,unit)
 else:
     if flag == 1:
-        getInfo(city,country,None) 
+        verbose(VER,'No unit change...\n',FH)
+        getInfo(VER,FH,city,country,None) 
     else:
-        getInfo(city,None,None)
+        verbose(VER,'No unit change...\n',FH)
+        getInfo(VER,FH,city,None,None)
