@@ -117,7 +117,8 @@ def getInfo(VER,FH,city,country=None,unit=None): #get data
         content = json.loads(urlopen(url).read()) #Fetch and load JSON data
         verbose(VER,'done.\n',FH)
         verbose(VER,'printing JSON result:\n',FH)
-        pprint.pprint(content)
+        if VER:
+            pprint.pprint(content)
         description = content['weather'][0]['description'] #get result accorfing to weather API
         max_temp = content['main']['temp_max']
         min_temp = content['main']['temp_min']
@@ -138,7 +139,7 @@ def getInfo(VER,FH,city,country=None,unit=None): #get data
     except (ValueError, KeyError):
         print 'If you are seeing this something went wrong, check your spelling!'
 
-VER = True
+VER = False
 FH = 1
 myArr = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
 
