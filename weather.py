@@ -11,10 +11,10 @@ It also uses some code from the Python Cookbook
 import sys,json,re,os,pprint
 from urllib import urlopen
 
-
-
 #following from Python cookbook, #475186
+
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
+myArr = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
 
 def has_colours(stream):
     if not hasattr(stream, "isatty"):
@@ -139,46 +139,47 @@ def getInfo(VER,FH,city,country=None,unit=None): #get data
     except (ValueError, KeyError):
         print 'If you are seeing this something went wrong, check your spelling!'
 
-VER = False
-FH = 1
-myArr = [RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN]
+def getWeather():
+    VER = False
+    FH = 1
+    try:
+        flag = 0
+        myRegex = '^(\d\d\d\d+)$' #city ID
+        city = sys.argv[1]
+        m = re.search(myRegex,city)
+        country = ''
+        if m == None: #if not continue as normal
+            verbose(VER,'Not using City Code...\n',FH)
+            country = sys.argv[2]
+            flag = 1
+        else:
+            verbose(VER,'Using City Code...\n',FH)
+    except (IndexError, AttributeError):
+        print 'usage: python ' + sys.argv[0] + ' <city> <country> <OPTIONAL unit: K, F, or C> '
+        print 'usage: python ' + sys.argv[0] + ' <city ID> <OPTIONAL unit: K, F, or C> '
+        sys.exit(0)
+    try:
+        flag2 = 0
+        if flag == 1:
+            unit = sys.argv[3]
+        else:
+            unit = sys.argv[2]
+    except IndexError:
+        flag2 = 1
+    if flag2 == 0:
+        if flag == 1:
+            verbose(VER,'Detected unit change...\n',FH)
+            getInfo(VER,FH,city,country,unit)
+        else:
+            verbose(VER,'Detected unit change...\n',FH)
+            getInfo(VER,FH,city,None,unit)
+    else:
+        if flag == 1:
+            verbose(VER,'No unit change...\n',FH)
+            getInfo(VER,FH,city,country,None) 
+        else:
+            verbose(VER,'No unit change...\n',FH)
+            getInfo(VER,FH,city,None,None)
 
-
-try:
-    flag = 0
-    myRegex = '^(\d\d\d\d+)$' #city ID
-    city = sys.argv[1]
-    m = re.search(myRegex,city)
-    country = ''
-    if m == None: #if not continue as normal
-        verbose(VER,'Not using City Code...\n',FH)
-        country = sys.argv[2]
-        flag = 1
-    else:
-        verbose(VER,'Using City Code...\n',FH)
-except (IndexError, AttributeError):
-    print 'usage: python ' + sys.argv[0] + ' <city> <country> <OPTIONAL unit: K, F, or C> '
-    print 'usage: python ' + sys.argv[0] + ' <city ID> <OPTIONAL unit: K, F, or C> '
-    sys.exit(0)
-try:
-    flag2 = 0
-    if flag == 1:
-        unit = sys.argv[3]
-    else:
-        unit = sys.argv[2]
-except IndexError:
-    flag2 = 1
-if flag2 == 0:
-    if flag == 1:
-        verbose(VER,'Detected unit change...\n',FH)
-        getInfo(VER,FH,city,country,unit)
-    else:
-        verbose(VER,'Detected unit change...\n',FH)
-        getInfo(VER,FH,city,None,unit)
-else:
-    if flag == 1:
-        verbose(VER,'No unit change...\n',FH)
-        getInfo(VER,FH,city,country,None) 
-    else:
-        verbose(VER,'No unit change...\n',FH)
-        getInfo(VER,FH,city,None,None)
+if __name__ == "__main__":
+    getWeather()
