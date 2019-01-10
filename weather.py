@@ -8,13 +8,14 @@ https://bbs.archlinux.org/viewtopic.php?id=37381
 It also uses some code from the Python Cookbook
 '''
 
-import sys
+import sys, traceback
 import json
 import re
 import os
 import pprint
 import argparse
-from urllib import urlopen
+import urllib.request
+from apikey import APPID
 
 #following from Python cookbook, #475186
 
@@ -85,7 +86,7 @@ def get_direction(wd): #convert from deg to compass direction used javascript @ 
 
 def print_verbose(ver,s):
 	if ver:
-		print s
+		print(s)
 
 #2 simple conversion functions
 def convertK2C2FToString(temp):
@@ -117,11 +118,11 @@ def print_info(city,country,cond,temp,tmax,tmin,windS,windD,arr,unit1,unit2):
 def get_info(verbose, city, country, unit):
 	try:
 		if country != None: #Contruct proper url depending on args
-			url = 'http://api.openweathermap.org/data/2.5/weather?q=%s,%s' % (city,country)
+			url = 'http://api.openweathermap.org/data/2.5/weather?q={},{}&APPID={}'.format(city,country, APPID);
 		else:
-			url = 'http://api.openweathermap.org/data/2.5/weather?q=%s' % (city)
-		print_verbose(verbose,'Sending/Receiving Request...')
-		content = json.loads(urlopen(url).read()) #Fetch and load JSON data
+			url = 'http://api.openweathermap.org/data/2.5/weather?q={}&APPID={}'.format(city, APPID);
+		print_verbose(verbose,'Sending/Receiving Request...'); print()
+		content = json.loads(urllib.request.urlopen(url).read().decode("utf-8")) #Fetch and load JSON data
 		print_verbose(verbose,'done.\n')
 		print_verbose(verbose,'printing JSON result:')
 		if verbose:
@@ -151,7 +152,7 @@ def get_info(verbose, city, country, unit):
 		wind_dir = get_direction(wind_deg)
 		print_info(city_json, country_json, description, temp, max_temp, min_temp, str(wind_speed), wind_dir, myArr, temp_unit, speed_unit)
 	except(ValueError, KeyError):
-		print 'If you are seeing this something went wrong, check your spelling!'
+		print('If you are seeing this something went wrong, check your spelling!')
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='Get the weather.')
